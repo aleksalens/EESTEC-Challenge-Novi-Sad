@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { RefreshControl } from 'react-native';
 import React from 'react';
 import { Menu, MenuOptions, MenuOption, MenuTrigger} from 'react-native-popup-menu';
+import axios from "axios";
 
 
 // const userIcon = require('./../assets/userIcon.png');
@@ -33,6 +34,7 @@ export default function HomeScreen({ navigation }) {
   firstName = 'John Smith';
   country = 'USA';
   messageReceiver = '+381611849518';
+  const [courses, setCourses] = useState([]);
 
   useEffect(() => {
     getLocation();
@@ -61,19 +63,9 @@ export default function HomeScreen({ navigation }) {
     return 'https://www.google.com/maps/search/?api=1&query=' + latitude + ',' + longitude;
   }
 
-  const getLocation = () => {
-    console.log('Getting location...');
-    // GetLocation.getCurrentPosition({
-    //   enableHighAccuracy: true,
-    //   timeout: 15000,
-    // })
-    // .then(location => {
-    //   console.log(location);
-    // })
-    // .catch(error => {
-    //   const { code, message } = error;
-    //   console.warn(code, message);
-    // });
+  const getLocation = async () => {
+    const response = await axios.get('https://worm-factual-fish.ngrok-free.app/GetPitanja/' + 1)
+    setCourses(response.data);
   }
 
   return (
@@ -101,15 +93,22 @@ export default function HomeScreen({ navigation }) {
         <View style={styles.row}>
           <Text style={styles.title}>Courses</Text>
         </View>
+
+        {courses.map((course) => {
+          return (
+            console.log(course),
+            <View style={styles.customMessageRow}>
+              <Pressable style={styles.courseButton} onPress={() => navigation.navigate("Questions", {course: course.courseName})}>
+                <View style={styles.verticalButtonLine}></View>
+                <Text style={styles.courseButtonText}>{course.courseName}</Text>
+                <Text style={styles.courseSubtitle}>Number of questions: {course.questionCount}</Text>
+              </Pressable>
+            </View>
+          )
+        })}
         
-        <View style={styles.customMessageRow}>
-          <Pressable style={styles.courseButton} onPress={() => navigation.navigate("Questions", {course: "History"})}>
-            <View style={styles.verticalButtonLine}></View>
-            <Text style={styles.courseButtonText}>History</Text>
-            <Text style={styles.courseSubtitle}>Number of questions: 30</Text>
-          </Pressable>
-        </View>
-        <View style={styles.customMessageRow}>
+        
+        {/* <View style={styles.customMessageRow}>
         <Pressable style={styles.courseButton} onPress={() => navigation.navigate("Questions", {course: "Math"})}>
             <View style={styles.verticalButtonLine}></View>
             <Text style={styles.courseButtonText}>Math</Text>
@@ -122,7 +121,7 @@ export default function HomeScreen({ navigation }) {
             <Text style={styles.courseButtonText}>Geography</Text>
             <Text style={styles.courseSubtitle}>Number of questions: 54</Text>
           </Pressable>
-        </View>
+        </View> */}
 
         <View style={styles.customMessageRow}>
             <Pressable style={styles.customButton} onPress={() => navigation.navigate("NewCourse")}>
