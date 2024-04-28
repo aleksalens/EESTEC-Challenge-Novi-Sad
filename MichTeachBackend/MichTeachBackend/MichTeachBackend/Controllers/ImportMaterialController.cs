@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Text;
 using System.Text.Json;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace MichTeachBackend.Controllers
 {
@@ -23,17 +24,24 @@ namespace MichTeachBackend.Controllers
             //_httpClient.BaseAddress = new Uri("https://6af9-34-73-126-108.ngrok-free.app");
         }
 
-        [HttpPost("/PostPDF/{uri}/{id}/{name}")]
-        public IActionResult PostPDF(Uri uri,int id,string name)
+        [HttpPost("/PostPDF/{id}/{name}")]
+        public async Task<IActionResult> PostPDF(int id,string name)
         {
-            iTextSharp.text.pdf.PdfReader reader = new iTextSharp.text.pdf.PdfReader(uri);
-            var page = PdfTextExtractor.GetTextFromPage(reader, 1);
+            iTextSharp.text.pdf.PdfReader reader = new iTextSharp.text.pdf.PdfReader("C:/Users/Dell/Desktop/NSHakaton/pdfcitanje/arthritis.pdf");
+            var page = PdfTextExtractor.GetTextFromPage(reader, 2);
 
+            var response = await _httpClient.PostAsync("https://1e85-34-125-74-81.ngrok-free.app/questions", JsonContent.Create(new ResponseHelloWorld() { response = page }));
+            var datareturned = await response.Content.ReadFromJsonAsync<ResponseHelloWorld>();
+            var returnedval = datareturned.response;
             //var fulluser = _context.Users.Include(u => u.Courses).ThenInclude(c => c.Questions).Where(u => u.Id == id).FirstOrDefault();
             //var qust = fulluser.Courses.Where(c => c.Name.Equals(name)).FirstOrDefault();
             //var qst = qust.Questions.Select(c => c.Title).FirstOrDefault();
-            var pdfContent = "1.Kako se zovu osnovni delovi ćelije biljaka i životinja?;2.Koje su osnovne funkcije korena biljaka?;3.Koja je razlika između sisavaca i ptica u pogledu načina ishrane?;4.Kako se razlikuju biljke od životinja po načinu disanja?;5.Koje su osnovne razlike između biljaka koje se razmnožavaju semenom i biljaka koje se razmnožavaju sporama?;6.Koji su delovi biljke odgovorni za fotosintezu i disanje?;7.Kako se razlikuju vretenasti crvi od zglavkara?;8.Koje su osnovne karakteristike kišnih šuma?;9.Koja je uloga bakterija u prirodi i u ljudskom telu?;10.Kako se razlikuju klijetke od bakterija po veličini i obliku?";
-            var questionarray = pdfContent.Split(";");
+            int lastIndex = returnedval.LastIndexOf('?');
+            string wantedText = returnedval.Substring(0, lastIndex + 1);
+
+            string pdfcontent = wantedText.Replace("?", "?;");
+            //var pdfContent = "1.Kako se zovu osnovni delovi ćelije biljaka i životinja?;2.Koje su osnovne funkcije korena biljaka?;3.Koja je razlika između sisavaca i ptica u pogledu načina ishrane?;4.Kako se razlikuju biljke od životinja po načinu disanja?;5.Koje su osnovne razlike između biljaka koje se razmnožavaju semenom i biljaka koje se razmnožavaju sporama?;6.Koji su delovi biljke odgovorni za fotosintezu i disanje?;7.Kako se razlikuju vretenasti crvi od zglavkara?;8.Koje su osnovne karakteristike kišnih šuma?;9.Koja je uloga bakterija u prirodi i u ljudskom telu?;10.Kako se razlikuju klijetke od bakterija po veličini i obliku?";
+            var questionarray = pdfcontent.Split(";");
             Course course = new Course()
             {
                 Name = name,
@@ -81,7 +89,7 @@ namespace MichTeachBackend.Controllers
             // Send POST request to FastAPI endpoint
             //var response = await _httpClient.GetAsync("https://eee6-34-73-126-108.ngrok-free.app/questions?string_param=" + pageS);
 
-            var response = await _httpClient.PostAsync("https://208b-34-73-126-108.ngrok-free.app/jquestions", JsonContent.Create(new ResponseHelloWorld() { response = pageS }));
+            var response = await _httpClient.PostAsync("https://fe04-34-125-74-81.ngrok-free.app/", JsonContent.Create(new ResponseHelloWorld() { response = pageS }));
 
 
 
