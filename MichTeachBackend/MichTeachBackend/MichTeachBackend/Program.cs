@@ -1,5 +1,7 @@
+using MichTeachBackend.Repository;
 using MichTeachBackend.Data;
 using Microsoft.EntityFrameworkCore;
+using MichTeachBackend.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +12,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();
+builder.Services.AddTransient<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<IJwtProvider, JwtProvider>();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("ApplicationDbContext"));

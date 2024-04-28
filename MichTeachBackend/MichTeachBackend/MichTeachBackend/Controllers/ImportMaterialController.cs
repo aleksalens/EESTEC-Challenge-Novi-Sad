@@ -111,8 +111,8 @@ namespace MichTeachBackend.Controllers
 
         }
 
-        [HttpGet("/GetPitanja/{id}")]
-        public IActionResult GetPitanja(int id)
+        [HttpGet("/GetInfo/{id}")]
+        public IActionResult GetInfo(int id)
         {
             var userHistory = _context.Users.Include(u => u.Courses).ThenInclude(c => c.Questions).Where(u => u.Id.Equals(id)).FirstOrDefault();
            
@@ -124,6 +124,15 @@ namespace MichTeachBackend.Controllers
 
             return Ok(courseInfo);
 
+        }
+
+        [HttpGet("/GetQuestions/{id}/{name}")]
+        public IActionResult GetQuestions(int id,string name)
+        {
+            
+            var questionsList = _context.Courses.Where(c => c.Name.Equals(name) && c.UserId.Equals(id)).Select(c => c.Questions).ToList();
+            var questions = questionsList.Select(q => q.Select(x => x.Title)).ToList();
+            return Ok(questions);
         }
 
         public class ResponseHelloWorld
