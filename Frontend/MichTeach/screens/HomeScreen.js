@@ -28,45 +28,18 @@ export default function HomeScreen({ navigation }) {
     }, 2000);
   }, []);
 
-  latitude = 44.7723685;
-  longitude = 20.4752970;
-  countryCode = 'srb';
-  firstName = 'John Smith';
-  country = 'USA';
-  messageReceiver = '+381611849518';
   const [courses, setCourses] = useState([]);
 
   useEffect(() => {
-    getLocation();
+    getCourses();
   }, []);
 
   const { logout } = useContext(AuthContext);
 
-
-  const sendSms = async (number, message) => {
-    const isAvailable = await SMS.isAvailableAsync();
-    if (isAvailable) {
-      const { result } = await SMS.sendSMSAsync([number], message);
-    } else {
-      // misfortune... there's no SMS available on this device
-    }
-  }
-
-  const sendCustomSms = async (message, longitude, latitude) => {
-    console.log('Sending custom message...' + message + longitude + latitude);
-    msg = await translateCustomMessage(message, longitude, latitude);
-    console.log(msg.data.broj + ' ' + msg.data.poruka + ' ' + getGoogleLink(latitude, longitude));
-    await SMS.sendSMSAsync(msg.data.broj, msg.data.poruka + ' ' + getGoogleLink(latitude, longitude));
-  }
-
-  const getGoogleLink = (latitude, longitude) => {
-    return 'https://www.google.com/maps/search/?api=1&query=' + latitude + ',' + longitude;
-  }
-
-  const getLocation = async () => {
-    const response = await axios.get('https://worm-factual-fish.ngrok-free.app/GetPitanja/' + 1)
+  const getCourses = async () => {
+    const response = await axios.get('https://worm-factual-fish.ngrok-free.app/GetInfo/' + userId)
     setCourses(response.data);
-  }
+  } 
 
   return (
     <View style={styles.root}>
@@ -97,8 +70,8 @@ export default function HomeScreen({ navigation }) {
         {courses.map((course) => {
           return (
             console.log(course),
-            <View style={styles.customMessageRow}>
-              <Pressable style={styles.courseButton} onPress={() => navigation.navigate("Questions", {course: course.courseName})}>
+            <View style={styles.customMessageRow} key={course.id}>
+              <Pressable style={styles.courseButton} onPress={() => navigation.navigate("Questions", { userId: userId, course: course.courseName})}>
                 <View style={styles.verticalButtonLine}></View>
                 <Text style={styles.courseButtonText}>{course.courseName}</Text>
                 <Text style={styles.courseSubtitle}>Number of questions: {course.questionCount}</Text>

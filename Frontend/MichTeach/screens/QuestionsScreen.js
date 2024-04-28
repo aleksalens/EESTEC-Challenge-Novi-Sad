@@ -6,6 +6,7 @@ import { useContext } from 'react';
 import { useState } from 'react';
 import { Linking } from 'react-native';
 import { Menu, MenuOptions, MenuOption, MenuTrigger} from 'react-native-popup-menu';
+import axios from "axios";
 
 
 // const userIcon = require('./../assets/userIcon.png');
@@ -16,55 +17,16 @@ const menuIcon = require('./../assets/menu.png');
 
 export default function HomeScreen({ route, navigation }) {
   const { userId } = useContext(AuthContext);
-  const[customMessage, setCustomMessage] = useState("");
-
-  latitude = 44.7723685;
-  longitude = 20.4752970;
-  countryCode = 'srb';
-  firstName = 'John Smith';
-  country = 'USA';
-  messageReceiver = '+381611849518';
+  const [courses, setCourses] = useState([]);
 
   useEffect(() => {
-    getLocation();
+    getCourses();
   }, []);
 
-  const { logout } = useContext(AuthContext);
 
-
-  const sendSms = async (number, message) => {
-    const isAvailable = await SMS.isAvailableAsync();
-    if (isAvailable) {
-      const { result } = await SMS.sendSMSAsync([number], message);
-    } else {
-      // misfortune... there's no SMS available on this device
-    }
-  }
-
-  const sendCustomSms = async (message, longitude, latitude) => {
-    console.log('Sending custom message...' + message + longitude + latitude);
-    msg = await translateCustomMessage(message, longitude, latitude);
-    console.log(msg.data.broj + ' ' + msg.data.poruka + ' ' + getGoogleLink(latitude, longitude));
-    await SMS.sendSMSAsync(msg.data.broj, msg.data.poruka + ' ' + getGoogleLink(latitude, longitude));
-  }
-
-  const getGoogleLink = (latitude, longitude) => {
-    return 'https://www.google.com/maps/search/?api=1&query=' + latitude + ',' + longitude;
-  }
-
-  const getLocation = () => {
-    console.log('Getting location...');
-    // GetLocation.getCurrentPosition({
-    //   enableHighAccuracy: true,
-    //   timeout: 15000,
-    // })
-    // .then(location => {
-    //   console.log(location);
-    // })
-    // .catch(error => {
-    //   const { code, message } = error;
-    //   console.warn(code, message);
-    // });
+  const getCourses = async () => {
+    const response = await axios.get('https://worm-factual-fish.ngrok-free.app/GetQuestions/' + userId + "/" + route.params.course)
+    setCourses(response.data[0]);
   }
 
   return (
@@ -73,47 +35,22 @@ export default function HomeScreen({ route, navigation }) {
 
       <View style={styles.container}>
 
-
         <View style={styles.row}>
           <Text style={styles.title}>{route.params.course} questions</Text>
         </View>
+
+        {courses.map((course) => {
+          return (
+            <View style={styles.customMessageRow}>
+              <Pressable style={styles.courseButton}>
+                <View style={styles.verticalButtonLine}></View>
+                <Text style={styles.courseButtonText}>{course}</Text>
+              </Pressable>
+            </View>
+          )
+        })}
         
-        <View style={styles.customMessageRow}>
-          <Pressable style={styles.courseButton} onPress={() => sendCustomSms(customMessage, longitude, latitude)}>
-            <View style={styles.verticalButtonLine}></View>
-            <Text style={styles.courseButtonText}>1. What is the name of the tallest mountain in the world?</Text>
-          </Pressable>
-        </View>
-        <View style={styles.customMessageRow}>
-          <Pressable style={styles.courseButton} onPress={() => sendCustomSms(customMessage, longitude, latitude)}>
-            <View style={styles.verticalButtonLine}></View>
-            <Text style={styles.courseButtonText}>2. What are the names of the seven continents of the world?</Text>
-          </Pressable>
-        </View>
-        <View style={styles.customMessageRow}>
-          <Pressable style={styles.courseButton} onPress={() => sendCustomSms(customMessage, longitude, latitude)}>
-            <View style={styles.verticalButtonLine}></View>
-            <Text style={styles.courseButtonText}>3. What is the name of the river that flows through the Brazilian rainforest?</Text>
-          </Pressable>
-        </View>
-        <View style={styles.customMessageRow}>
-          <Pressable style={styles.courseButton} onPress={() => sendCustomSms(customMessage, longitude, latitude)}>
-            <View style={styles.verticalButtonLine}></View>
-            <Text style={styles.courseButtonText}>3. What is the name of the river that flows through the Brazilian rainforest?</Text>
-          </Pressable>
-        </View>
-        <View style={styles.customMessageRow}>
-          <Pressable style={styles.courseButton} onPress={() => sendCustomSms(customMessage, longitude, latitude)}>
-            <View style={styles.verticalButtonLine}></View>
-            <Text style={styles.courseButtonText}>3. What is the name of the river that flows through the Brazilian rainforest?</Text>
-          </Pressable>
-        </View>
-        <View style={styles.customMessageRow}>
-          <Pressable style={styles.courseButton} onPress={() => sendCustomSms(customMessage, longitude, latitude)}>
-            <View style={styles.verticalButtonLine}></View>
-            <Text style={styles.courseButtonText}>3. What is the name of the river that flows through the Brazilian rainforest?</Text>
-          </Pressable>
-        </View>
+       
       </View>
       </ScrollView>
     </View>
@@ -205,7 +142,7 @@ const styles = StyleSheet.create({
   },
   title: {
     margin: 10,
-    fontSize: 40,
+    fontSize: 34,
     fontWeight: '700',
     marginBottom: 20,
     color: '#00B4DB',
