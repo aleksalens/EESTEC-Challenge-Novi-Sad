@@ -23,9 +23,11 @@ namespace MichTeachBackend.Controllers
             //_httpClient.BaseAddress = new Uri("https://6af9-34-73-126-108.ngrok-free.app");
         }
 
-        [HttpPost("/PostPDF/{id}/{name}")]
-        public IActionResult PostPDF(int id,string name)
+        [HttpPost("/PostPDF/{uri}/{id}/{name}")]
+        public IActionResult PostPDF(Uri uri,int id,string name)
         {
+            iTextSharp.text.pdf.PdfReader reader = new iTextSharp.text.pdf.PdfReader(uri);
+            var page = PdfTextExtractor.GetTextFromPage(reader, 1);
 
             //var fulluser = _context.Users.Include(u => u.Courses).ThenInclude(c => c.Questions).Where(u => u.Id == id).FirstOrDefault();
             //var qust = fulluser.Courses.Where(c => c.Name.Equals(name)).FirstOrDefault();
