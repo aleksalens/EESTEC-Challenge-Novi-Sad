@@ -1,0 +1,6 @@
+@MichTeachBackend_HostAddress = http://localhost:5160
+
+GET {{MichTeachBackend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
