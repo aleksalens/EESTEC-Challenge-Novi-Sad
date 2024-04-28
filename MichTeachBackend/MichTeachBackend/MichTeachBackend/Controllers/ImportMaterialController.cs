@@ -1,5 +1,8 @@
 ﻿using iTextSharp.text.pdf.parser;
+using MichTeachBackend.Data;
+using MichTeachBackend.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Text;
 using System.Text.Json;
@@ -10,14 +13,53 @@ namespace MichTeachBackend.Controllers
     [ApiController]
     public class ImportMaterialController : Controller
     {
-
+        private readonly ApplicationDbContext _context;
         private readonly HttpClient _httpClient;
 
-        public ImportMaterialController(HttpClient httpClient)
+        public ImportMaterialController(HttpClient httpClient, ApplicationDbContext context)
         {
             _httpClient = httpClient;
+            _context = context;
             //_httpClient.BaseAddress = new Uri("https://6af9-34-73-126-108.ngrok-free.app");
         }
+
+        [HttpPost("/PostPDF/{id}/{name}")]
+        public IActionResult PostPDF(int id,string name)
+        {
+
+            //var fulluser = _context.Users.Include(u => u.Courses).ThenInclude(c => c.Questions).Where(u => u.Id == id).FirstOrDefault();
+            //var qust = fulluser.Courses.Where(c => c.Name.Equals(name)).FirstOrDefault();
+            //var qst = qust.Questions.Select(c => c.Title).FirstOrDefault();
+            var pdfContent = "1.Kako se zovu osnovni delovi ćelije biljaka i životinja?;2.Koje su osnovne funkcije korena biljaka?;3.Koja je razlika između sisavaca i ptica u pogledu načina ishrane?;4.Kako se razlikuju biljke od životinja po načinu disanja?;5.Koje su osnovne razlike između biljaka koje se razmnožavaju semenom i biljaka koje se razmnožavaju sporama?;6.Koji su delovi biljke odgovorni za fotosintezu i disanje?;7.Kako se razlikuju vretenasti crvi od zglavkara?;8.Koje su osnovne karakteristike kišnih šuma?;9.Koja je uloga bakterija u prirodi i u ljudskom telu?;10.Kako se razlikuju klijetke od bakterija po veličini i obliku?";
+            var questionarray = pdfContent.Split(";");
+            Course course = new Course()
+            {
+                Name = name,
+                UserId = id,
+            };
+
+            _context.Add(course);
+            _context.SaveChanges();
+
+            var courseid = _context.Courses.Where(c => c.Name == name).Select(c => c.Id).FirstOrDefault();
+            List<Question> questionList = new List<Question>();
+            foreach (var question in questionarray)
+            {
+                Question q = new Question()
+                {
+                    Title = question,
+                    CourseId = courseid,
+                };
+                questionList.Add(q);
+                
+            }
+
+            _context.AddRange(questionList);
+            _context.SaveChanges();
+
+            return Ok();
+        }
+
 
         [HttpGet]
         public async Task<ResponseHelloWorld> Get()
@@ -37,9 +79,50 @@ namespace MichTeachBackend.Controllers
             // Send POST request to FastAPI endpoint
             //var response = await _httpClient.GetAsync("https://eee6-34-73-126-108.ngrok-free.app/questions?string_param=" + pageS);
 
-            var response = await _httpClient.PostAsync("https://208b-34-73-126-108.ngrok-free.app/jquestions", JsonContent.Create(new ResponseHelloWorld () { response = pageS}));
+            var response = await _httpClient.PostAsync("https://208b-34-73-126-108.ngrok-free.app/jquestions", JsonContent.Create(new ResponseHelloWorld() { response = pageS }));
 
-            return await response.Content.ReadFromJsonAsync<ResponseHelloWorld>();
+
+
+
+            var datareturned = await response.Content.ReadFromJsonAsync<ResponseHelloWorld>();
+            var returnedval = datareturned.response;
+
+            var staticString = "1. What is your favorite color?;2. Do you prefer cats or dogs?;3. What is your dream vacation destination?;4. Are you a morning person or a night owl?;5. What is your favorite season?;6. Do you enjoy reading books?;7. What is your favorite type of music?;8. Do you prefer coffee or tea?;9. What is your favorite hobby?;10. What is your favorite movie genre?";
+
+            var questionarray = staticString.Split(";");
+
+            Course course = new Course()
+            {
+                Name = "Predmet",
+                UserId = 1,
+            };
+
+            _context.Add(course);
+
+            foreach(var question in questionarray)
+            {
+                Question q = new Question()
+                {
+                    Title = question,
+                };
+            }
+
+            return datareturned;
+
+        }
+
+        [HttpGet("/GetPitanja/{id}")]
+        public IActionResult GetPitanja(int id)
+        {
+            var userHistory = _context.Users.Include(u => u.Courses).ThenInclude(c => c.Questions).Where(u => u.Id.Equals(id)).FirstOrDefault();
+           
+            var courseInfo = userHistory.Courses.Select(course => new
+            {
+                CourseName = course.Name,
+                QuestionCount = course.Questions.Count
+            }).ToList();
+
+            return Ok(courseInfo);
 
         }
 

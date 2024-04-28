@@ -10,7 +10,7 @@ namespace MichTeachBackend.Models
         public string FullName { get; set; }
         public string Email { get; set; }
 
-        public string Password { get; set; }
+        public string UserPassword { get; set; }
         [ValidateNever]
         public List<Course> Courses { get; set; }
     }
