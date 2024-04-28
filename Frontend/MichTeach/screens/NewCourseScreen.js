@@ -8,6 +8,7 @@ import { Linking } from 'react-native';
 import { Menu, MenuOptions, MenuOption, MenuTrigger} from 'react-native-popup-menu';
 import DocumentPicker from 'react-native-document-picker';
 import axios from "axios";
+import RNFS from 'react-native-fs';
 
 export default function HomeScreen({ navigation }) {
   const { userId } = useContext(AuthContext);
@@ -25,10 +26,9 @@ export default function HomeScreen({ navigation }) {
       type: fileType
     }
     body.append('file', file)
-    axios.post('https://your-api-endpoint.com/your-endpoint', body, {
-        headers: {
-          'Content-Type': 'multipart/form-data', // Important to set the correct Content-Type
-        }});
+    const pdfBase64 = await RNFS.readFile(fileUri, 'base64');
+
+    axios.post('https://worm-factual-fish.ngrok-free.app/PostPDF/2/Medicina')
     navigation.navigate("Home")
   }
 
@@ -60,6 +60,10 @@ export default function HomeScreen({ navigation }) {
       <ScrollView style={styles.scrollView}  contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
 
       <View style={styles.container}>
+
+      <View style={styles.row}>
+          <Text style={styles.title}>New course</Text>
+      </View>
 
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'start'}}>
         <Text style={styles.fieldText}>Course name</Text>

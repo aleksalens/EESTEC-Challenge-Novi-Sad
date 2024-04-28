@@ -13,7 +13,7 @@ const AppStack = () => {
       <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }}/>
       <Stack.Screen name="NewCourse" component={NewCourseScreen} 
         options={{ 
-          title: 'New Course',
+          title: '',
           headerStyle: {
               backgroundColor: '#00B4DB',
           },
