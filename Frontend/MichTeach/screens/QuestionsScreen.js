@@ -25,7 +25,7 @@ export default function HomeScreen({ route, navigation }) {
 
 
   const getCourses = async () => {
-    const response = await axios.get('https://worm-factual-fish.ngrok-free.app/GetQuestions/' + 2 + "/" + route.params.course)
+    const response = await axios.get('https://worm-factual-fish.ngrok-free.app/GetQuestions/' + userId + "/" + route.params.course)
     setCourses(response.data[0]);
   }
 
